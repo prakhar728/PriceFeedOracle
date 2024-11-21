@@ -79,5 +79,5 @@ pub struct PriceData {
 
 #[ext_contract(price_oracle)]
 trait PriceOracle {
-    fn get_price_data(&self) -> PriceData;
+    fn get_price_data(&self, asset_ids: Option<Vec<AssetId>>) -> PriceData;
 }

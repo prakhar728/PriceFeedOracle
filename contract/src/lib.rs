@@ -26,7 +26,7 @@ impl Contract {
         // Create a promise to call HelloNEAR.get_greeting()
         price_oracle::ext(self.price_oracle.clone())
             .with_static_gas(Gas::from_tgas(5))
-            .get_price_data()
+            .get_price_data(None)
             .then(
                 Self::ext(env::current_account_id())
                     .with_static_gas(Gas::from_tgas(5))

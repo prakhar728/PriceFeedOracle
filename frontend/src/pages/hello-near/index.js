@@ -4,6 +4,7 @@ import { NearContext } from "@/wallets/near";
 import styles from "@/styles/app.module.css";
 import { HelloNearContract } from "../../config";
 import { Cards } from "@/components/cards";
+import { providers } from "near-api-js";
 
 // Contract that the app will interact with
 const CONTRACT = HelloNearContract;
@@ -15,14 +16,6 @@ export default function HelloNear() {
   const [newGreeting, setNewGreeting] = useState("loading...");
   const [loggedIn, setLoggedIn] = useState(false);
   const [showSpinner, setShowSpinner] = useState(false);
-
-  // useEffect(() => {
-  //   if (!wallet) return;
-
-  //   wallet
-  //     .viewMethod({ contractId: CONTRACT, method: "get_greeting" })
-  //     .then((greeting) => setGreeting(greeting));
-  // }, [wallet]);
 
   useEffect(() => {
     setLoggedIn(!!signedAccountId);
@@ -44,18 +37,65 @@ export default function HelloNear() {
   };
 
   const callPriceFeed = async () => {
-    console.log("Callng it!");
+    try {
+      // Instead of waiting for direct return, get transaction details
+      const outcome = await wallet.callMethod({
+        contractId: CONTRACT,
+        method: "query_price_feed",
+      });
 
-
-    const greeting = await wallet.callMethod({
-      contractId: CONTRACT,
-      method: "query_price_feed",
-    });
-    
-
-    console.log(greeting);
-    
+      // Store transaction hash in localStorage before redirect
+      localStorage.setItem("lastTransactionHash", outcome.transaction.hash);
+    } catch (error) {
+      console.error("Error calling price feed:", error);
+    }
   };
+
+  useEffect(() => {
+    const decodeSuccessValue = (successValue) => {
+      // Convert base64 to string
+      const decodedString = Buffer.from(successValue, "base64").toString(
+        "utf-8"
+      );
+
+      try {
+        // Try to parse as JSON if it's a JSON string
+        return JSON.parse(decodedString);
+      } catch {
+        // If not JSON, return the string as is
+        return decodedString;
+      }
+    };
+
+    const getTx = async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const transactionHashes = urlParams.get("transactionHashes");
+
+      console.log(transactionHashes);
+
+      const provider = new providers.JsonRpcProvider({
+        url: "https://rpc.testnet.near.org",
+      });
+
+      if (transactionHashes) {
+        const result = await provider.txStatus(
+          transactionHashes, // you might want to see if this is an array or what I am not sure.
+          CONTRACT,
+          "FINAL"
+        );
+
+        console.log(
+          decodeSuccessValue(
+            result.receipts_outcome[1].outcome.status.SuccessValue
+          )
+        );
+
+        // Clean up URL
+        // window.history.replaceState({}, '', window.location.pathname)
+      }
+    };
+    if (wallet) getTx();
+  }, [wallet]);
 
   return (
     <main className={styles.main}>
