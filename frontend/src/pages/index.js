@@ -132,7 +132,7 @@ export default function HelloNear() {
 
         {!prices && !loading && (
           <div className={styles.message}>
-            Click "Refresh Prices" to load the latest prices
+            Click &ldquo;Refresh Prices&ldquo; to load the latest prices
           </div>
         )}
       </div>
