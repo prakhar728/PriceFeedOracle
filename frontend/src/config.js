@@ -1,6 +1,6 @@
 const contractPerNetwork = {
   mainnet: 'hello.near-examples.near',
-  testnet: 'hello.near-examples.testnet',
+  testnet: 'pricfeed.testnet',
 };
 
 // Chains for EVM Wallets 

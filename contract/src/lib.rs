@@ -1,5 +1,5 @@
-// Find all our documentation at https://docs.near.org
-use near_sdk::{env, log, near, AccountId, Gas, PanicOnDefault, Promise, PromiseError};
+use near_sdk::serde_json;
+use near_sdk::{env, log, near, AccountId, Gas, PanicOnDefault, Promise, PromiseError}; // Add this import
 
 pub mod external;
 pub use crate::external::*;
@@ -24,32 +24,32 @@ impl Contract {
     // Public - query external greeting
     pub fn query_price_feed(&self) -> Promise {
         // Create a promise to call HelloNEAR.get_greeting()
-        let promise = price_oracle::ext(self.price_oracle.clone())
+        price_oracle::ext(self.price_oracle.clone())
             .with_static_gas(Gas::from_tgas(5))
-            .get_price_data();
-
-        return promise.then(
-            // Create a promise to callback query_price_data_callback
-            Self::ext(env::current_account_id())
-                .with_static_gas(Gas::from_tgas(5))
-                .query_price_data_callback(),
-        );
+            .get_price_data()
+            .then(
+                Self::ext(env::current_account_id())
+                    .with_static_gas(Gas::from_tgas(5))
+                    .query_price_data_callback(),
+            )
     }
 
-    #[private] // Public - but only callable by env::current_account_id()
+    #[private]
     pub fn query_price_data_callback(
         &self,
-        #[callback_result] call_result: Result<String, PromiseError>,
+        #[callback_result] call_result: Result<PriceData, PromiseError>
     ) -> String {
-        // Check if the promise succeeded by calling the method outlined in external.rs
         if call_result.is_err() {
             log!("There was an error contacting Price Feed");
-            return "".to_string();
+            return "Error fetching price data".to_string();
         }
 
-        // Return the greeting
-        let greeting: String = call_result.unwrap();
-        greeting
+        let price_data = call_result.unwrap();
+        // Convert PriceData to JSON string
+        match serde_json::to_string(&price_data) {
+            Ok(json_string) => json_string,
+            Err(_) => "Error serializing price data".to_string()
+        }
     }
 }
 

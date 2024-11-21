@@ -1,9 +1,9 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext } from "react";
 
-import { NearContext } from '@/wallets/near';
-import styles from '@/styles/app.module.css';
-import { HelloNearContract } from '../../config';
-import { Cards } from '@/components/cards';
+import { NearContext } from "@/wallets/near";
+import styles from "@/styles/app.module.css";
+import { HelloNearContract } from "../../config";
+import { Cards } from "@/components/cards";
 
 // Contract that the app will interact with
 const CONTRACT = HelloNearContract;
@@ -11,18 +11,18 @@ const CONTRACT = HelloNearContract;
 export default function HelloNear() {
   const { signedAccountId, wallet } = useContext(NearContext);
 
-  const [greeting, setGreeting] = useState('loading...');
-  const [newGreeting, setNewGreeting] = useState('loading...');
+  const [greeting, setGreeting] = useState("loading...");
+  const [newGreeting, setNewGreeting] = useState("loading...");
   const [loggedIn, setLoggedIn] = useState(false);
   const [showSpinner, setShowSpinner] = useState(false);
 
-  useEffect(() => {
-    if (!wallet) return;
+  // useEffect(() => {
+  //   if (!wallet) return;
 
-    wallet.viewMethod({ contractId: CONTRACT, method: 'get_greeting' }).then(
-      greeting => setGreeting(greeting)
-    );
-  }, [wallet]);
+  //   wallet
+  //     .viewMethod({ contractId: CONTRACT, method: "get_greeting" })
+  //     .then((greeting) => setGreeting(greeting));
+  // }, [wallet]);
 
   useEffect(() => {
     setLoggedIn(!!signedAccountId);
@@ -30,10 +30,31 @@ export default function HelloNear() {
 
   const saveGreeting = async () => {
     setShowSpinner(true);
-    await wallet.callMethod({ contractId: CONTRACT, method: 'set_greeting', args: { greeting: newGreeting } });
-    const greeting = await wallet.viewMethod({ contractId: CONTRACT, method: 'get_greeting' });
+    await wallet.callMethod({
+      contractId: CONTRACT,
+      method: "set_greeting",
+      args: { greeting: newGreeting },
+    });
+    const greeting = await wallet.viewMethod({
+      contractId: CONTRACT,
+      method: "get_greeting",
+    });
     setGreeting(greeting);
     setShowSpinner(false);
+  };
+
+  const callPriceFeed = async () => {
+    console.log("Callng it!");
+
+
+    const greeting = await wallet.callMethod({
+      contractId: CONTRACT,
+      method: "query_price_feed",
+    });
+    
+
+    console.log(greeting);
+    
   };
 
   return (
@@ -54,7 +75,7 @@ export default function HelloNear() {
             type="text"
             className="form-control w-20"
             placeholder="Store a new greeting"
-            onChange={t => setNewGreeting(t.target.value)}
+            onChange={(t) => setNewGreeting(t.target.value)}
           />
           <div className="input-group-append">
             <button className="btn btn-secondary" onClick={saveGreeting}>
@@ -69,6 +90,13 @@ export default function HelloNear() {
         <div className="w-100 text-end align-text-center" hidden={loggedIn}>
           <p className="m-0"> Please login to change the greeting </p>
         </div>
+      </div>
+
+      <div>
+        Call price feed
+        <button className="btn btn-secondary" onClick={callPriceFeed}>
+          <span hidden={showSpinner}> Call </span>
+        </button>
       </div>
       <Cards />
     </main>
