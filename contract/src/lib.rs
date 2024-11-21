@@ -21,9 +21,7 @@ impl Contract {
         Self { price_oracle }
     }
 
-    // Public - query external greeting
     pub fn query_price_feed(&self) -> Promise {
-        // Create a promise to call HelloNEAR.get_greeting()
         price_oracle::ext(self.price_oracle.clone())
             .with_static_gas(Gas::from_tgas(5))
             .get_price_data(None)
@@ -52,26 +50,3 @@ impl Contract {
         }
     }
 }
-
-/*
- * The rest of this file holds the inline tests for the code above
- * Learn more about Rust tests: https://doc.rust-lang.org/book/ch11-01-writing-tests.html
- */
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
-
-//     #[test]
-//     fn get_default_greeting() {
-//         let contract = Contract::default();
-//         // this test did not call set_greeting so should return the default "Hello" greeting
-//         assert_eq!(contract.get_greeting(), "Hello");
-//     }
-
-//     #[test]
-//     fn set_then_get_greeting() {
-//         let mut contract = Contract::default();
-//         contract.set_greeting("howdy".to_string());
-//         assert_eq!(contract.get_greeting(), "howdy");
-//     }
-// }

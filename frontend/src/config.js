@@ -1,5 +1,4 @@
 const contractPerNetwork = {
-  mainnet: 'hello.near-examples.near',
   testnet: 'pricefeed2.testnet',
 };
 
@@ -20,5 +19,5 @@ const evmWalletChains = {
 }
 
 export const NetworkId = 'testnet';
-export const HelloNearContract = contractPerNetwork[NetworkId];
+export const PriceOracleContract = contractPerNetwork[NetworkId];
 export const EVMWalletChain = evmWalletChains[NetworkId];
